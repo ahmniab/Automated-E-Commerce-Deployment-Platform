@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>eShop.IntegrationEventLogEF</RootNamespace>
+    <IsPublishable>false</IsPublishable>
+    <PackageId>eShop.IntegrationEventLogEF</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>eShop Team</Authors>
+    <Company>eShop</Company>
+    <Description>Library for persisting and tracking integration events using Entity Framework Core in eShop-based microservices.</Description>
+    <PackageTags>eshop;integration-events;eventlog;entityframework;efcore</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+    <PackageReference Include="eShop.EventBus" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
