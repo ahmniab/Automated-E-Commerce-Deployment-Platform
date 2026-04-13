@@ -12,7 +12,6 @@ pipeline {
             steps {
                 sh """
                 docker run --rm \
-                    -u \$(id -u):\$(id -g) \
                     -v ${WORKSPACE}:/app:z \
                     -w /app \
                     -e DOTNET_CLI_HOME=/app/.dotnet-temp \
