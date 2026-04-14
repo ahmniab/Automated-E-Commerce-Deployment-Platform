@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "eshop/catalog-api"
-        IMAGE_TAG = "latest"
+        IMAGE_NAME = "ahmniab/eshop-catalog-api"
+        IMAGE_TAG = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
         DOCKERFILE_TEST = "Dockerfile.test"
-        DOCKERFILE_APP = "src/microservices/eShop.Catalog.API/Dockerfile"
+        DOCKERFILE_APP = "Dockerfile"
         CONTEXT_PATH = "."
     }
 
@@ -37,7 +37,7 @@ pipeline {
 
         stage('Push to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
                         echo $PASS | docker login -u $USER --password-stdin
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
