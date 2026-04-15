@@ -28,6 +28,8 @@ public static class Extensions
         builder.Services.AddSingleton<BasketService>();
         builder.Services.AddSingleton<OrderStatusNotificationService>();
         builder.Services.AddSingleton<IProductImageUrlProvider, ProductImageUrlProvider>();
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddTransient<GrpcAuthTokenDelegatingHandler>();
 
         // HTTP and GRPC client registrations
 
@@ -37,7 +39,7 @@ public static class Extensions
         string basketApiName = builder.Configuration.GetRequiredValue("BasketServiceUrl");
 
         builder.Services.AddGrpcClient<Basket.BasketClient>(o => o.Address = new(basketApiName))
-            .AddAuthToken();
+            .AddHttpMessageHandler<GrpcAuthTokenDelegatingHandler>();
 
         builder.Services.AddHttpClient<CatalogService>(o => o.BaseAddress = new(catalogApiName))
             .AddServiceDiscovery()
@@ -73,13 +75,14 @@ public static class Extensions
         {
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.Authority = identityUrl;
-            options.SignedOutRedirectUri = callBackUrl;
             options.ClientId = "webapp";
             options.ClientSecret = "secret";
+            options.PushedAuthorizationBehavior = PushedAuthorizationBehavior.Disable;
             options.ResponseType = "code";
             options.SaveTokens = true;
             options.GetClaimsFromUserInfoEndpoint = true;
             options.RequireHttpsMetadata = false;
+            options.SignedOutRedirectUri = callBackUrl;
             options.Scope.Add("openid");
             options.Scope.Add("profile");
             options.Scope.Add("orders");
