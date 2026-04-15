@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace eShop.ServiceDefaults;
 
@@ -46,6 +47,12 @@ public static class HttpClientExtensions
             if (_httpContextAccessor.HttpContext is HttpContext context)
             {
                 var accessToken = await context.GetTokenAsync("access_token");
+
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    var authResult = await context.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    accessToken = authResult.Properties?.GetTokenValue("access_token");
+                }
 
                 if (accessToken is not null)
                 {
