@@ -2,6 +2,9 @@
 {
     public class Config
     {
+        private const string Localhost = "localhost";
+        private const string LoopbackIp = "127.0.0.1";
+
         // ApiResources define the apis in your system
         public static IEnumerable<ApiResource> GetApis()
         {
@@ -88,14 +91,8 @@
                     AllowOfflineAccess = true,
                     AlwaysIncludeUserClaimsInIdToken = true,
                     RequirePkce = false,
-                    RedirectUris = new List<string>
-                    {
-                        $"{configuration["WebAppClient"]}/signin-oidc"
-                    },
-                    PostLogoutRedirectUris = new List<string>
-                    {
-                        $"{configuration["WebAppClient"]}/signout-callback-oidc"
-                    },
+                    RedirectUris = BuildClientUris(configuration["WebAppClient"], "/signin-oidc"),
+                    PostLogoutRedirectUris = BuildClientUris(configuration["WebAppClient"], "/signout-callback-oidc"),
                     AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
@@ -123,14 +120,8 @@
                     RequireConsent = false,
                     AllowOfflineAccess = true,
                     AlwaysIncludeUserClaimsInIdToken = true,
-                    RedirectUris = new List<string>
-                    {
-                        $"{configuration["WebhooksWebClient"]}/signin-oidc"
-                    },
-                    PostLogoutRedirectUris = new List<string>
-                    {
-                        $"{configuration["WebhooksWebClient"]}/signout-callback-oidc"
-                    },
+                    RedirectUris = BuildClientUris(configuration["WebhooksWebClient"], "/signin-oidc"),
+                    PostLogoutRedirectUris = BuildClientUris(configuration["WebhooksWebClient"], "/signout-callback-oidc"),
                     AllowedScopes = new List<string>
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
@@ -187,6 +178,52 @@
                     }
                 }
             };
+        }
+
+        private static List<string> BuildClientUris(string? baseClientUri, string callbackPath)
+        {
+            if (string.IsNullOrWhiteSpace(baseClientUri))
+            {
+                return new List<string>();
+            }
+
+            return BuildLoopbackAliases(baseClientUri)
+                .Select(uri => $"{uri.TrimEnd('/')}{callbackPath}")
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static IEnumerable<string> BuildLoopbackAliases(string baseClientUri)
+        {
+            var normalizedBaseUri = baseClientUri.TrimEnd('/');
+            var aliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                normalizedBaseUri
+            };
+
+            if (!Uri.TryCreate(normalizedBaseUri, UriKind.Absolute, out var uri))
+            {
+                return aliases;
+            }
+
+            if (!uri.Host.Equals(LoopbackIp, StringComparison.OrdinalIgnoreCase)
+                && !uri.Host.Equals(Localhost, StringComparison.OrdinalIgnoreCase))
+            {
+                return aliases;
+            }
+
+            var aliasHost = uri.Host.Equals(LoopbackIp, StringComparison.OrdinalIgnoreCase)
+                ? Localhost
+                : LoopbackIp;
+
+            var aliasUri = new UriBuilder(uri)
+            {
+                Host = aliasHost
+            };
+
+            aliases.Add(aliasUri.Uri.ToString().TrimEnd('/'));
+
+            return aliases;
         }
     }
 }

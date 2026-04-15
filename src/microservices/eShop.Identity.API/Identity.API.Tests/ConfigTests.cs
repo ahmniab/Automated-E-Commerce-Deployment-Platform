@@ -66,4 +66,27 @@ public class ConfigTests
         var maui = clients.Single(c => c.ClientId == "maui");
         Assert.Contains("https://maui.test/callback", maui.RedirectUris);
     }
+
+    [Fact]
+    public void GetClients_webapp_redirect_uris_include_localhost_and_loopback_aliases()
+    {
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["MauiCallback"] = "https://maui.test/callback",
+                ["WebAppClient"] = "http://127.0.0.1:8080",
+                ["WebhooksWebClient"] = "https://webhooks-web.test",
+                ["BasketApiClient"] = "https://basket-api.test",
+                ["OrderingApiClient"] = "https://ordering-api.test",
+                ["WebhooksApiClient"] = "https://webhooks-api.test"
+            })
+            .Build();
+
+        var webappClient = Config.GetClients(config).Single(c => c.ClientId == "webapp");
+
+        Assert.Contains("http://127.0.0.1:8080/signin-oidc", webappClient.RedirectUris);
+        Assert.Contains("http://localhost:8080/signin-oidc", webappClient.RedirectUris);
+        Assert.Contains("http://127.0.0.1:8080/signout-callback-oidc", webappClient.PostLogoutRedirectUris);
+        Assert.Contains("http://localhost:8080/signout-callback-oidc", webappClient.PostLogoutRedirectUris);
+    }
 }
