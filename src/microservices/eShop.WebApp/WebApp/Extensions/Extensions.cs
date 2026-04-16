@@ -25,7 +25,7 @@ public static class Extensions
         // Application services
         builder.Services.AddScoped<BasketState>();
         builder.Services.AddScoped<LogOutService>();
-        builder.Services.AddSingleton<BasketService>();
+        builder.Services.AddScoped<BasketService>();
         builder.Services.AddSingleton<OrderStatusNotificationService>();
         builder.Services.AddSingleton<IProductImageUrlProvider, ProductImageUrlProvider>();
 
@@ -104,4 +104,5 @@ public static class Extensions
         var user = authState.User;
         return user.FindFirst("name")?.Value;
     }
+
 }
