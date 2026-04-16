@@ -1,0 +1,181 @@
+services:
+  postgres:
+    image: ankane/pgvector
+    environment:
+      POSTGRES_USER: eshop
+      POSTGRES_PASSWORD: ${postgres_password}
+      POSTGRES_DB: identitydb
+    networks:
+      - postgres-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./src/postgress/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+  
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres -d identitydb"]
+        interval: 10s
+        timeout: 5s
+        retries: 10
+        start_period: 20s
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    command: ["redis-server", "--appendonly", "yes", "--port", "6380"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - redis-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-p", "6380", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: eshop
+      RABBITMQ_DEFAULT_PASS: ${rabbitmq_password}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - rabbitmq-network
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  identity-api:
+    build:
+      context: ./src/microservices/eShop.Identity.API
+      dockerfile: Dockerfile
+    networks:
+      - postgres-network
+      - rabbitmq-network
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5223
+      ConnectionStrings__identitydb: Host=postgres;Port=5432;Database=identitydb;Username=eshop;Password=${postgres_password}
+      MauiCallback: maui://authcallback
+      WebAppClient: http://localhost:8080
+      BasketApiClient: http://127.0.0.1:5221
+      OrderingApiClient: http://127.0.0.1:5224
+      WebhooksWebClient: http://127.0.0.1:5099
+      WebhooksApiClient: http://127.0.0.1:5099
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5223:5223"
+    restart: unless-stopped
+  
+  catalog-api:
+    build:
+      context: ./src/microservices/eShop.Catalog.API
+      dockerfile: Dockerfile
+    networks:
+      - postgres-network
+      - rabbitmq-network
+      - catalog-network
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5222
+      ConnectionStrings__catalogdb: Host=postgres;Port=5432;Database=catalogdb;Username=eshop;Password=${postgres_password}
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672/
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: eshop
+      RabbitMQ__Password: ${rabbitmq_password}
+      RabbitMQ__VirtualHost: /
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  basket-api:
+    build:
+      context: ./src/microservices/eShop.Basket.API
+      dockerfile: Dockerfile
+    networks:
+      - redis-network
+      - rabbitmq-network
+      - basket-network
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5221
+      ConnectionStrings__Redis: localhost:6380,abortConnect=false
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672/
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: eshop
+      RabbitMQ__Password: ${rabbitmq_password}
+      RabbitMQ__VirtualHost: /
+      Identity__Url: http://localhost:5223
+      Identity__Audience: basket
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+    restart: unless-stopped
+  
+  webapp:
+    build:
+      context: ./src/microservices/eShop.WebApp
+      dockerfile: Dockerfile
+    networks:
+      - redis-network
+      - rabbitmq-network
+      - basket-network
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5045
+      IdentityUrl: http://localhost:5223
+      CallBackUrl: http://127.0.0.1:8080
+      CatalogServiceUrl: http://catalog-api:5222
+      BasketServiceUrl: http://basket-api:5221
+      OrderServiceUrl: http://127.0.0.1:5224
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672/
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: eshop
+      RabbitMQ__Password: ${rabbitmq_password}
+      RabbitMQ__VirtualHost: /
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+      catalog-api:
+        condition: service_started
+      basket-api:
+        condition: service_started
+      # ordering-api:
+      #   condition: service_started
+    ports:
+      - "8080:5045"
+    restart: unless-stopped
+
+
+networks:  
+  postgres-network:
+  redis-network:
+  rabbitmq-network:
+  basket-network:
+  catalog-network:
+
+volumes:
+  postgres-data:
+  redis_data:
+  rabbitmq_data:
