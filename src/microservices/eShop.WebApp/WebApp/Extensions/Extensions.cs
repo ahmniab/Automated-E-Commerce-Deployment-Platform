@@ -60,8 +60,6 @@ public static class Extensions
         var identityUrl = configuration["Identity:Url"];
         var identityAuthorityBaseUrl = identityUrl?.TrimEnd('/');
         var identityMetadataAddress = $"{configuration["Identity:MetadataAddress"]}/.well-known/openid-configuration";
-        Console.WriteLine($"Identity URL: {identityUrl}");
-        Console.WriteLine($"Identity Metadata Address: {identityMetadataAddress}");
         var callBackUrl = configuration.GetRequiredValue("CallBackUrl");
         var sessionCookieLifetime = configuration.GetValue("SessionCookieLifetimeMinutes", 60);
 
@@ -92,6 +90,15 @@ public static class Extensions
                     if (!string.IsNullOrWhiteSpace(identityAuthorityBaseUrl))
                     {
                         context.ProtocolMessage.IssuerAddress = $"{identityAuthorityBaseUrl}/connect/authorize";
+                    }
+
+                    return Task.CompletedTask;
+                },
+                OnRedirectToIdentityProviderForSignOut = context =>
+                {
+                    if (!string.IsNullOrWhiteSpace(identityAuthorityBaseUrl))
+                    {
+                        context.ProtocolMessage.IssuerAddress = $"{identityAuthorityBaseUrl}/connect/endsession";
                     }
 
                     return Task.CompletedTask;
