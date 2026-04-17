@@ -42,7 +42,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - rabbitmq-network
+      - eshop-network
     healthcheck:
       test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
       interval: 10s
@@ -57,7 +57,7 @@ services:
       dockerfile: Dockerfile
     networks:
       - postgres-network
-      - rabbitmq-network
+      - eshop-network
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5223
@@ -81,13 +81,12 @@ services:
       dockerfile: Dockerfile
     networks:
       - postgres-network
-      - rabbitmq-network
-      - catalog-network
+      - eshop-network
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5222
       ConnectionStrings__catalogdb: Host=postgres;Port=5432;Database=catalogdb;Username=eshop;Password=${postgres_password}
-      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672/
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Port: 5672
       RabbitMQ__UserName: eshop
@@ -106,20 +105,19 @@ services:
       dockerfile: Dockerfile
     networks:
       - redis-network
-      - rabbitmq-network
-      - basket-network
+      - eshop-network
 
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5221
-      ConnectionStrings__Redis: localhost:6380,abortConnect=false
-      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672/
+      ConnectionStrings__Redis: redis:6380,abortConnect=false
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Port: 5672
       RabbitMQ__UserName: eshop
       RabbitMQ__Password: ${rabbitmq_password}
       RabbitMQ__VirtualHost: /
-      Identity__Url: http://localhost:5223
+      Identity__Url: http://identity-api:5223
       Identity__Audience: basket
     depends_on:
       redis:
@@ -136,17 +134,18 @@ services:
       dockerfile: Dockerfile
     networks:
       - redis-network
-      - rabbitmq-network
-      - basket-network
+      - eshop-network
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:5045
-      IdentityUrl: http://localhost:5223
-      CallBackUrl: http://127.0.0.1:8080
+      Identity__Url: http://localhost:5223
+      Identity__Audience: webapp
+      Identity__MetadataAddress: http://identity-api:5223
+      CallBackUrl: http://localhost:8080
       CatalogServiceUrl: http://catalog-api:5222
       BasketServiceUrl: http://basket-api:5221
       OrderServiceUrl: http://127.0.0.1:5224
-      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672/
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Port: 5672
       RabbitMQ__UserName: eshop
@@ -171,9 +170,7 @@ services:
 networks:  
   postgres-network:
   redis-network:
-  rabbitmq-network:
-  basket-network:
-  catalog-network:
+  eshop-network:
 
 volumes:
   postgres-data:
