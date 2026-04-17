@@ -57,7 +57,11 @@ public static class Extensions
 
         JsonWebTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
 
-        var identityUrl = configuration.GetRequiredValue("IdentityUrl");
+        var identityUrl = configuration["Identity:Url"];
+        var identityAuthorityBaseUrl = identityUrl?.TrimEnd('/');
+        var identityMetadataAddress = $"{configuration["Identity:MetadataAddress"]}/.well-known/openid-configuration";
+        Console.WriteLine($"Identity URL: {identityUrl}");
+        Console.WriteLine($"Identity Metadata Address: {identityMetadataAddress}");
         var callBackUrl = configuration.GetRequiredValue("CallBackUrl");
         var sessionCookieLifetime = configuration.GetValue("SessionCookieLifetimeMinutes", 60);
 
@@ -74,12 +78,25 @@ public static class Extensions
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.Authority = identityUrl;
             options.SignedOutRedirectUri = callBackUrl;
+            options.MetadataAddress = identityMetadataAddress;
             options.ClientId = "webapp";
             options.ClientSecret = "secret";
             options.ResponseType = "code";
             options.SaveTokens = true;
             options.GetClaimsFromUserInfoEndpoint = true;
             options.RequireHttpsMetadata = false;
+            options.Events = new OpenIdConnectEvents
+            {
+                OnRedirectToIdentityProvider = context =>
+                {
+                    if (!string.IsNullOrWhiteSpace(identityAuthorityBaseUrl))
+                    {
+                        context.ProtocolMessage.IssuerAddress = $"{identityAuthorityBaseUrl}/connect/authorize";
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
             options.Scope.Add("openid");
             options.Scope.Add("profile");
             options.Scope.Add("orders");
