@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./src/postgress/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
-  
+
     healthcheck:
         test: ["CMD-SHELL", "pg_isready -U postgres -d identitydb"]
         interval: 10s
@@ -65,7 +65,7 @@ services:
       MauiCallback: maui://authcallback
       WebAppClient: http://localhost:8080
       BasketApiClient: http://127.0.0.1:5221
-      OrderingApiClient: http://127.0.0.1:5224
+      OrderingApiClient: http://ordering-api:5224
       WebhooksWebClient: http://127.0.0.1:5099
       WebhooksApiClient: http://127.0.0.1:5099
     depends_on:
@@ -74,7 +74,7 @@ services:
     ports:
       - "5223:5223"
     restart: unless-stopped
-  
+
   catalog-api:
     build:
       context: ./src/microservices/eShop.Catalog.API
@@ -127,7 +127,7 @@ services:
       identity-api:
         condition: service_started
     restart: unless-stopped
-  
+
   webapp:
     build:
       context: ./src/microservices/eShop.WebApp
@@ -144,7 +144,7 @@ services:
       CallBackUrl: http://localhost:8080
       CatalogServiceUrl: http://catalog-api:5222
       BasketServiceUrl: http://basket-api:5221
-      OrderServiceUrl: http://127.0.0.1:5224
+      OrderServiceUrl: http://ordering-api:5224
       ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Port: 5672
@@ -160,14 +160,42 @@ services:
         condition: service_started
       basket-api:
         condition: service_started
-      # ordering-api:
-      #   condition: service_started
+      ordering-api:
+        condition: service_started
     ports:
       - "8080:5045"
     restart: unless-stopped
 
+  ordering-api:
+    build:
+      context: ./src/microservices/eShop.Ordering.API
+      dockerfile: Dockerfile
+    networks:
+      - postgres-network
+      - eshop-network
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5224
+      ConnectionStrings__orderingdb: Host=postgres;Port=5432;Database=orderingdb;Username=eshop;Password=${postgres_password}
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: eshop
+      RabbitMQ__Password: ${rabbitmq_password}
+      RabbitMQ__VirtualHost: /
+      Identity__Url: http://identity-api:5223
+      Identity__Audience: orders
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      identity-api:
+        condition: service_started
+    restart: unless-stopped
 
-networks:  
+
+networks:
   postgres-network:
   redis-network:
   eshop-network:
