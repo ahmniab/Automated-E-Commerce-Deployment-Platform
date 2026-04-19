@@ -197,6 +197,49 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  order-processor:
+    build:
+      context: ./src/microservices/eShop.OrderProcessor
+      dockerfile: Dockerfile
+    networks:
+      - eshop-network
+      - postgres-network
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DOTNET_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:16888
+      ConnectionStrings__postgres: Host=postgres;Port=5432;Database=orderingdb;Username=eshop;Password=${postgres_password}
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: eshop
+      RabbitMQ__Password: ${rabbitmq_password}
+      RabbitMQ__VirtualHost: /
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  payment-processor:
+    build:
+      context: ./src/microservices/eShop.PaymentProcessor
+      dockerfile: Dockerfile
+    networks:
+      - eshop-network
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5226
+      ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
+      RabbitMQ__Host: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: eshop
+      RabbitMQ__Password: ${rabbitmq_password}
+      RabbitMQ__VirtualHost: /
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
 
 networks:
   postgres-network:
