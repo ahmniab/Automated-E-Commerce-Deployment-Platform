@@ -19,16 +19,16 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 
 builder.Services.AddIdentityServer(options =>
 {
-    //options.IssuerUri = "null";
+    options.IssuerUri = "http://identity-api:5223";
     options.Authentication.CookieLifetime = TimeSpan.FromHours(2);
-
+    
     options.Events.RaiseErrorEvents = true;
     options.Events.RaiseInformationEvents = true;
     options.Events.RaiseFailureEvents = true;
     options.Events.RaiseSuccessEvents = true;
 
     // TODO: Remove this line in production.
-    options.KeyManagement.Enabled = false;
+    // options.KeyManagement.Enabled = false;
 })
 .AddInMemoryIdentityResources(Config.GetResources())
 .AddInMemoryApiScopes(Config.GetApiScopes())
