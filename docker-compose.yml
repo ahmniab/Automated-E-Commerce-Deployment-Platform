@@ -65,7 +65,7 @@ services:
       MauiCallback: maui://authcallback
       WebAppClient: http://localhost:8080
       BasketApiClient: http://127.0.0.1:5221
-      OrderingApiClient: http://ordering-api:5224
+      OrderingApiClient: http://ordering-api:5224 # iss localhost:5224 identity-api
       WebhooksWebClient: http://127.0.0.1:5099
       WebhooksApiClient: http://127.0.0.1:5099
     depends_on:
@@ -183,8 +183,11 @@ services:
       RabbitMQ__UserName: eshop
       RabbitMQ__Password: ${rabbitmq_password}
       RabbitMQ__VirtualHost: /
-      Identity__Url: http://identity-api:5223
+      Identity__Url: http://localhost:5223
       Identity__Audience: orders
+      Identity__MetadataAddress: http://identity-api:5223
+      Logging__LogLevel__Microsoft.AspNetCore.Authentication: Debug
+      Logging__LogLevel__Microsoft.IdentityModel: Debug
     depends_on:
       postgres:
         condition: service_healthy
