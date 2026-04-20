@@ -52,6 +52,7 @@ services:
     restart: unless-stopped
 
   identity-api:
+    image: ahmniab/eshop-identity-api
     build:
       context: ./src/microservices/eShop.Identity.API
       dockerfile: Dockerfile
@@ -76,6 +77,7 @@ services:
     restart: unless-stopped
 
   catalog-api:
+    image: ahmniab/eshop-catalog-api
     build:
       context: ./src/microservices/eShop.Catalog.API
       dockerfile: Dockerfile
@@ -98,6 +100,7 @@ services:
     restart: unless-stopped
 
   basket-api:
+    image: ahmniab/eshop-basket-api
     build:
       context: ./src/microservices/eShop.Basket.API
       dockerfile: Dockerfile
@@ -125,6 +128,7 @@ services:
     restart: unless-stopped
 
   webapp:
+    image: ahmniab/eshop-webapp
     build:
       context: ./src/microservices/eShop.WebApp
       dockerfile: Dockerfile
@@ -161,6 +165,7 @@ services:
     restart: unless-stopped
 
   ordering-api:
+    image: ahmniab/eshop-ordering-api
     build:
       context: ./src/microservices/eShop.Ordering.API
       dockerfile: Dockerfile
@@ -190,6 +195,7 @@ services:
     restart: unless-stopped
 
   order-processor:
+    image: ahmniab/eshop-order-processor
     build:
       context: ./src/microservices/eShop.OrderProcessor
       dockerfile: Dockerfile
@@ -214,6 +220,7 @@ services:
     restart: unless-stopped
 
   payment-processor:
+    image: ahmniab/eshop-payment-processor
     build:
       context: ./src/microservices/eShop.PaymentProcessor
       dockerfile: Dockerfile
