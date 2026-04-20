@@ -1,11 +1,7 @@
-# Automated-E-Commerce-Deployment-Platform-
-
----
+# Automated-E-Commerce-Deployment-Platform
 
 ## Project Name
 Automated E-Commerce Deployment Platform
-
----
 
 ## Project Idea
 This project focuses on building a fully automated deployment platform for an e-commerce microservices application using modern DevOps practices.
@@ -14,8 +10,6 @@ The goal is to design and implement an infrastructure that allows developers to 
 
 The platform demonstrates how DevOps tools integrate together to provide a scalable and automated environment for cloud-native applications.
 
----
-
 ## Team Members
 - Ahmed Nabil
 - Fady Yacoub
@@ -23,8 +17,6 @@ The platform demonstrates how DevOps tools integrate together to provide a scala
 - Ahmed Temsah
 - AbdAllah Amr
 - Toni Ihab
-
----
 
 ## Project Plan
 
@@ -41,12 +33,8 @@ The platform demonstrates how DevOps tools integrate together to provide a scala
 | 1-7 → 10-7 | 10 Days | **Phase 9: Integration & Testing**<br>Integrate all tools and perform load testing. |
 | 11-7 → 20-7 | 10 Days | **Phase 10: Documentation & Final Review**<br>Finalize documentation and prepare project presentation. |
 
----
-
 ## Roles & Responsibilities
 Team members collaborate on infrastructure automation, containerization, CI/CD implementation, monitoring, and deployment.
-
----
 
 ## KPIs (Key Performance Indicators)
 - System uptime and availability
@@ -55,12 +43,9 @@ Team members collaborate on infrastructure automation, containerization, CI/CD i
 - Infrastructure scalability
 - Monitoring accuracy
 
----
 
 ## Instructor
 Ahmed Gamil 
-
----
 
 ## Project Files
 Google Drive:
