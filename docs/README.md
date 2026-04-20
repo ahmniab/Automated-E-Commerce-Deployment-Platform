@@ -32,7 +32,7 @@ flowchart TB
     OrderProcessor --> OrderingDB
     BasketAPI --> Redis
 
-    %% Message broker connections (event-driven communication)
+    %% Message broker connections
     CatalogAPI -->|"publish events"| RabbitMQ
     BasketAPI -->|"publish events"| RabbitMQ
     OrderingAPI -->|"publish events"| RabbitMQ
@@ -40,7 +40,7 @@ flowchart TB
     RabbitMQ -->|"consume events"| OrderProcessor
     RabbitMQ -->|"consume events"| PaymentProcessor
 
-    %% Direct API calls (sync communication)
+    %% Direct API calls
     WebApp --> IdentityAPI
     WebApp --> CatalogAPI
     WebApp --> BasketAPI
@@ -51,11 +51,11 @@ flowchart TB
     
     OrderProcessor --> OrderingAPI
 
-    %% Styling
-    classDef database fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef messagebus fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef service fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef frontend fill:#f3e5f5,stroke:#6a1b9a,stroke-width:2px
+    %% Updated GitHub-Compatible Styling
+    classDef database fill:#ddf4ff,stroke:#0969da,stroke-width:2px,color:#0550ae
+    classDef messagebus fill:#fff8ec,stroke:#bf4b00,stroke-width:2px,color:#953800
+    classDef service fill:#dafbe1,stroke:#1a7f37,stroke-width:2px,color:#116329
+    classDef frontend fill:#fbefff,stroke:#8250df,stroke-width:2px,color:#6639ba
     
     class IdentityDB,CatalogDB,OrderingDB,Redis database
     class RabbitMQ messagebus
