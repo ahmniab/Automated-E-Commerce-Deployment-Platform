@@ -42,16 +42,19 @@ public static class AuthenticationExtensions
         {
             var identityUrl = identitySection.GetRequiredValue("Url");
             var audience = identitySection.GetRequiredValue("Audience");
+            var metadataAddress = identitySection.GetValue("MetadataAddress", $"{identityUrl}");
+            var metadataFullAddress = $"{metadataAddress}/.well-known/openid-configuration";
 
             options.Authority = identityUrl;
             options.RequireHttpsMetadata = false;
             options.Audience = audience;
+            options.MetadataAddress = metadataFullAddress;
 
 #if DEBUG
             //Needed if using Android Emulator Locally. See https://learn.microsoft.com/en-us/dotnet/maui/data-cloud/local-web-services?view=net-maui-8.0#android
-            options.TokenValidationParameters.ValidIssuers = [identityUrl, "https://10.0.2.2:5243"];
+            options.TokenValidationParameters.ValidIssuers = [identityUrl, metadataAddress, metadataFullAddress, "https://10.0.2.2:5243"];
 #else
-            options.TokenValidationParameters.ValidIssuers = [identityUrl];
+            options.TokenValidationParameters.ValidIssuers = [identityUrl, metadataAddress, metadataFullAddress];
 #endif
 
             options.TokenValidationParameters.ValidateAudience = false;

@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "ahmniab/eshop-orderprocessor"
+        IMAGE_NAME = "ahmniab/eshop-order-processor"
         VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
     }
