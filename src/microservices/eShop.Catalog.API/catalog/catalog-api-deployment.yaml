@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-api-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: catalog-api
+  template:
+    metadata:
+      labels:
+        app: catalog-api
+    spec:
+      containers:
+        - name: catalog-api
+          image: kirolosj79-blip/catalog-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+
+            - name: ASPNETCORE_URLS
+              value: http://0.0.0.0:8080
+
+            - name: ConnectionStrings__catalogdb
+              value: Host=catalog-postgres-service;Port=5432;Database=catalogdb;Username=postgres;Password=password

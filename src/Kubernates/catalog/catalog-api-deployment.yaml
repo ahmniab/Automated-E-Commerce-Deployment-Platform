@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-postgres
+  template:
+    metadata:
+      labels:
+        app: catalog-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:pg16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: catalogdb
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: password
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-api-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: catalog-api
+  template:
+    metadata:
+      labels:
+        app: catalog-api
+    spec:
+
+      # 🧠 ده أهم جزء: API يستنى DB يجهز
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox
+          command: ['sh', '-c', 'until nc -z catalog-postgres-service 5432; do echo waiting for db; sleep 2; done;']
+
+      containers:
+        - name: catalog-api
+          image: catalog-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+
+            - name: ASPNETCORE_URLS
+              value: http://0.0.0.0:8080
+
+            - name: ConnectionStrings__catalogdb
+              value: Host=catalog-postgres-service;Port=5432;Database=catalogdb;Username=postgres;Password=password
