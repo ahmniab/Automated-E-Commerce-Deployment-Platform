@@ -44,7 +44,7 @@ services:
     networks:
       - eshop-network
     healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      test: ["CMD-SHELL", "rabbitmq-diagnostics check_port_connectivity"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -55,17 +55,17 @@ services:
     build:
       context: ./src/microservices/eShop.Identity.API
       dockerfile: Dockerfile
+    volumes:
+      - identity_keys:/app/keys
     networks:
       - postgres-network
       - eshop-network
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:5223
       ConnectionStrings__identitydb: Host=postgres;Port=5432;Database=identitydb;Username=eshop;Password=${postgres_password}
       MauiCallback: maui://authcallback
       WebAppClient: http://localhost:8080
       BasketApiClient: http://127.0.0.1:5221
-      OrderingApiClient: http://ordering-api:5224 # iss localhost:5224 identity-api
+      OrderingApiClient: http://ordering-api:5224
       WebhooksWebClient: http://127.0.0.1:5099
       WebhooksApiClient: http://127.0.0.1:5099
     depends_on:
@@ -83,8 +83,6 @@ services:
       - postgres-network
       - eshop-network
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:5222
       ConnectionStrings__catalogdb: Host=postgres;Port=5432;Database=catalogdb;Username=eshop;Password=${postgres_password}
       ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
@@ -108,8 +106,6 @@ services:
       - eshop-network
 
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:5221
       ConnectionStrings__Redis: redis:6380,abortConnect=false
       ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
@@ -136,8 +132,6 @@ services:
       - redis-network
       - eshop-network
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:5045
       Identity__Url: http://localhost:5223
       Identity__Audience: webapp
       Identity__MetadataAddress: http://identity-api:5223
@@ -174,8 +168,6 @@ services:
       - postgres-network
       - eshop-network
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:5224
       ConnectionStrings__orderingdb: Host=postgres;Port=5432;Database=orderingdb;Username=eshop;Password=${postgres_password}
       ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
@@ -205,9 +197,6 @@ services:
       - eshop-network
       - postgres-network
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      DOTNET_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:16888
       ConnectionStrings__postgres: Host=postgres;Port=5432;Database=orderingdb;Username=eshop;Password=${postgres_password}
       ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
@@ -231,8 +220,6 @@ services:
     networks:
       - eshop-network
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:5226
       ConnectionStrings__EventBus: amqp://eshop:${rabbitmq_password}@rabbitmq:5672
       RabbitMQ__Host: rabbitmq
       RabbitMQ__Port: 5672
@@ -242,8 +229,6 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      order-processor:
-        condition: service_started
     restart: unless-stopped
 
 
@@ -256,3 +241,4 @@ volumes:
   postgres-data:
   redis_data:
   rabbitmq_data:
+  identity_keys:
