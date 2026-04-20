@@ -25,7 +25,7 @@ public static class Extensions
         // Application services
         builder.Services.AddScoped<BasketState>();
         builder.Services.AddScoped<LogOutService>();
-        builder.Services.AddSingleton<BasketService>();
+        builder.Services.AddScoped<BasketService>();
         builder.Services.AddSingleton<OrderStatusNotificationService>();
         builder.Services.AddSingleton<IProductImageUrlProvider, ProductImageUrlProvider>();
 
@@ -57,7 +57,9 @@ public static class Extensions
 
         JsonWebTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
 
-        var identityUrl = configuration.GetRequiredValue("IdentityUrl");
+        var identityUrl = configuration["Identity:Url"];
+        var identityAuthorityBaseUrl = identityUrl?.TrimEnd('/');
+        var identityMetadataAddress = $"{configuration["Identity:MetadataAddress"]}/.well-known/openid-configuration";
         var callBackUrl = configuration.GetRequiredValue("CallBackUrl");
         var sessionCookieLifetime = configuration.GetValue("SessionCookieLifetimeMinutes", 60);
 
@@ -74,12 +76,34 @@ public static class Extensions
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.Authority = identityUrl;
             options.SignedOutRedirectUri = callBackUrl;
+            options.MetadataAddress = identityMetadataAddress;
             options.ClientId = "webapp";
             options.ClientSecret = "secret";
             options.ResponseType = "code";
             options.SaveTokens = true;
             options.GetClaimsFromUserInfoEndpoint = true;
             options.RequireHttpsMetadata = false;
+            options.Events = new OpenIdConnectEvents
+            {
+                OnRedirectToIdentityProvider = context =>
+                {
+                    if (!string.IsNullOrWhiteSpace(identityAuthorityBaseUrl))
+                    {
+                        context.ProtocolMessage.IssuerAddress = $"{identityAuthorityBaseUrl}/connect/authorize";
+                    }
+
+                    return Task.CompletedTask;
+                },
+                OnRedirectToIdentityProviderForSignOut = context =>
+                {
+                    if (!string.IsNullOrWhiteSpace(identityAuthorityBaseUrl))
+                    {
+                        context.ProtocolMessage.IssuerAddress = $"{identityAuthorityBaseUrl}/connect/endsession";
+                    }
+
+                    return Task.CompletedTask;
+                }
+            };
             options.Scope.Add("openid");
             options.Scope.Add("profile");
             options.Scope.Add("orders");
@@ -104,4 +128,5 @@ public static class Extensions
         var user = authState.User;
         return user.FindFirst("name")?.Value;
     }
+
 }

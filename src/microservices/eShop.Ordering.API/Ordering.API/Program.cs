@@ -7,7 +7,14 @@ builder.Services.AddProblemDetails();
 builder.Services.AddApiVersioning();
 builder.Services.AddOpenApi();
 
+builder.Services.AddHttpLogging(logging =>
+{
+    logging.LoggingFields = HttpLoggingFields.All;
+});
+
 var app = builder.Build();
+
+app.UseHttpLogging();
 
 app.MapDefaultEndpoints();
 

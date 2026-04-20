@@ -16,6 +16,7 @@ global using Microsoft.Extensions.Logging;
 global using FluentValidation;
 global using MediatR;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.HttpLogging;
 global using Microsoft.EntityFrameworkCore;
 global using eShop.EventBus.Abstractions;
 global using eShop.EventBus.Events;

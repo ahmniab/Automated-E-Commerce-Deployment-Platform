@@ -12,7 +12,7 @@
     
     <!-- NuGet Package Metadata -->
     <PackageId>eShop.ServiceDefaults.Depi</PackageId>
-    <Version>1.0.0-beta.1</Version>
+    <Version>1.0.0-beta.2</Version>
     <Authors>Ahmed Nabil</Authors>
     <Company>DEPI DevOps Team</Company>
     <Description>Shared service configuration defaults for .NET microservices: OpenTelemetry, health checks, resilience, and authentication.</Description>
