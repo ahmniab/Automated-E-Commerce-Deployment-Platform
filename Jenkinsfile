@@ -4,11 +4,14 @@ node  {
     }
     stage('Deploy Changed Services') {
        
-        def jops = sh(script: '/usr/bin/python ./src/scripts/get-deployment-jops', returnStdout: true).trim().split('\n')
-        if (jops.length == 0) {
+        def scriptOutput = sh(script: '/usr/bin/python ./src/scripts/get-deployment-jops', returnStdout: true).trim()
+        
+        if (scriptOutput.isEmpty()) {
             echo "No services to deploy."
-            return
+            return 
         }
+
+        def jops = scriptOutput.split('\n')
 
         stage('Login to docker') {
             steps {
