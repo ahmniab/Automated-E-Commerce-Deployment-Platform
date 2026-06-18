@@ -18,10 +18,3 @@ for f_path in csproj_files:
         pass
 
 print('\n'.join([f"{jop[0]}:{jop[1]}" for jop in jops]))
-
-## development
-
-print('src/microservices/eShop.Basket.API/Jenkinsfile:1.0.1')
-print('src/microservices/eShop.Ordering.API/Jenkinsfile:1.0.1')
-print('src/microservices/eShop.OrderProcessor/Jenkinsfile:1.0.1')
-print('src/microservices/eShop.Identity.API/Jenkinsfile:1.0.1')
