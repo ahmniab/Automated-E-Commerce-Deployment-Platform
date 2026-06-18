@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <PublishAot Condition="'$(EnableAotPublishing)' == 'true'">true</PublishAot>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
