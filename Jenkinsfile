@@ -5,11 +5,11 @@ node  {
     stage('Deploy Changed Services') {
        
         def jops = sh(script: '/usr/bin/python ./src/scripts/get-deployment-jops', returnStdout: true).trim().split('\n')
-        if (jops.isEmpty()) {
+        if (jops.length == 0) {
             echo "No services to deploy."
             return
         }
-        
+
         stage('Login to docker') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
