@@ -1,9 +1,11 @@
 node  {
-
     stage('Deploy Changed Services') {
         echo "current path: ${env.WORKSPACE}"
-        sh "echo $(ls)"
+        
+        sh 'echo $(ls)' 
+        
         def jops = sh(script: '/usr/bin/python ./src/scripts/get-deployment-jops', returnStdout: true).trim().split('\n')
+        
         for (jop in jops) {
             def jopDetails = jop.split(':')
             def jopPath = jopDetails[0]
@@ -14,7 +16,5 @@ node  {
                 echo "Error loading ${jopPath}: ${e.getMessage()}"
             }
         }
-        
     }
-    
 }
