@@ -7,7 +7,7 @@ pipeline {
 
         DOCKERFILE_TEST = "Dockerfile.test"
         DOCKERFILE_APP = "Dockerfile"
-        CONTEXT_PATH = "."
+        CONTEXT_PATH = "src/microservices/eShop.Catalog.API"
     }
 
     stages {
