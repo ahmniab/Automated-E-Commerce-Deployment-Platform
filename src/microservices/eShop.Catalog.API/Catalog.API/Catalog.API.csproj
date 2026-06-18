@@ -38,8 +38,6 @@
     <PackageReference Include="Pgvector.EntityFrameworkCore" Version="0.3.0" />
   </ItemGroup>
 
-
-
   <ItemGroup>
     <Content Include="Pics\*.webp" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
