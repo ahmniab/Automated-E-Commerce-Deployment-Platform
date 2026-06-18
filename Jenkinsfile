@@ -1,4 +1,7 @@
 node  {
+    stage('Checkout Code') {
+        checkout scm
+    }
     stage('Deploy Changed Services') {
         echo "current path: ${env.WORKSPACE}"
         
