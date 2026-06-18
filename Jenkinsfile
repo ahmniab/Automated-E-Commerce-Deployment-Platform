@@ -11,12 +11,17 @@ node  {
         
         for (jop in jops) {
             def jopDetails = jop.split(':')
-            def jopPath = jopDetails[0]
-            env.VERSION = jopDetails[1]
-            try {
-                load jopPath
-            } catch (Exception e) {
-                echo "Error loading ${jopPath}: ${e.getMessage()}"
+            if (jopDetails.length >= 2) {
+                def jopPath = jopDetails[0].trim() // Added trim() to clean up stray spaces
+                env.VERSION = jopDetails[1].trim()
+                
+                try {
+                    load jopPath
+                } catch (Exception e) {
+                    echo "❌ Error loading ${jopPath}: ${e.getMessage()}"
+                }
+            } else {
+                echo "Skipping malformed line: '${jop}'"
             }
         }
     }
