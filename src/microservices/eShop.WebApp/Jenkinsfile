@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "ahmniab/eshop-webapp"
-        VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+        // VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
     }
 
