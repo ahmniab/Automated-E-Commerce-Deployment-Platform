@@ -1,38 +1,24 @@
-pipeline {
-    agent any
 
-    environment {
-        IMAGE_NAME = "ahmniab/eshop-order-processor"
-        // VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+env.IMAGE_NAME = "ahmniab/eshop-order-processor"
+// VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
+stage('Run Tests for Order Processor') {
+    steps {
+        sh """
+        docker run --rm \
+            -v "${WORKSPACE}/src/microservices/eShop.OrderProcessor:/app:z" \
+            -w /app \
+            -e DOTNET_CLI_HOME=/app/.dotnet-temp \
+            mcr.microsoft.com/dotnet/sdk:10.0 \
+            dotnet test eShop.OrderProcessor.sln
+        """
     }
 
-    stages {
-        stage('Run Tests') {
-            steps {
-                sh """
-                docker run --rm \
-                    -v "${WORKSPACE}/src/microservices/eShop.OrderProcessor:/app:z" \
-                    -w /app \
-                    -e DOTNET_CLI_HOME=/app/.dotnet-temp \
-                    mcr.microsoft.com/dotnet/sdk:10.0 \
-                    dotnet test eShop.OrderProcessor.sln
-                """
-            }
+}
 
-        }
-        stage('Login to docker') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                    sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
-                }
-            }
-        }
-        stage('Build and Push Docker Image') {
-            steps {
-                sh 'docker build -t $IMAGE_NAME:$VERSION src/microservices/eShop.OrderProcessor'
-                sh 'docker push $IMAGE_NAME:$VERSION'
-            }
-        }
+stage('Build and Push Order Processor Image') {
+    steps {
+        sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.OrderProcessor"
+        sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
     }
 }

@@ -1,58 +1,35 @@
-pipeline {
-    agent any
 
-    environment {
-        IMAGE_NAME = "ahmniab/eshop-catalog-api"
-        // VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+env.IMAGE_NAME = "ahmniab/eshop-catalog-api"
+// VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
-        DOCKERFILE_TEST = "Dockerfile.test"
-        DOCKERFILE_APP = "Dockerfile"
-        CONTEXT_PATH = "src/microservices/eShop.Catalog.API"
-    }
+env.DOCKERFILE_TEST = "Dockerfile.test"
+env.DOCKERFILE_APP = "Dockerfile"
+env.CONTEXT_PATH = "src/microservices/eShop.Catalog.API"
 
-    stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Test (via Docker)') {
-            steps {
-                sh "docker build -f ${DOCKERFILE_TEST} ${CONTEXT_PATH}"
-            }
-        }
-
-        stage('Build Image') {
-            steps {
-                sh """
-                    docker build \
-                    -t ${IMAGE_NAME}:${VERSION} \
-                    -f ${DOCKERFILE_APP} \
-                    ${CONTEXT_PATH}
-                """
-            }
-        }
-
-        stage('Push to DockerHub') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh """
-                        echo $PASS | docker login -u $USER --password-stdin
-                        docker push ${IMAGE_NAME}:${VERSION}
-                    """
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo "Pipeline SUCCESS 🚀"
-        }
-        failure {
-            echo "Pipeline FAILED ❌"
-        }
+stage('Test Catalog API') {
+    steps {
+        sh "docker build -f ${env.DOCKERFILE_TEST} ${env.CONTEXT_PATH}"
     }
 }
+
+stage('Build Catalog API Image') {
+    steps {
+        sh """
+            docker build \
+            -t ${env.IMAGE_NAME}:${env.VERSION} \
+            -f ${env.DOCKERFILE_APP} \
+            ${env.CONTEXT_PATH}
+        """
+    }
+}
+
+stage('Push Catalog API Image to DockerHub') {
+    steps {
+        sh """
+            docker push ${env.IMAGE_NAME}:${env.VERSION}
+        """
+    }
+}
+
+
