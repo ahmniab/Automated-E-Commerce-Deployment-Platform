@@ -3,23 +3,18 @@ env.IMAGE_NAME = "ahmniab/eshop-payment-processor"
 // VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
 stage('Run Tests') {
-    steps {
-        sh """
-        docker run --rm \
-            -v "${WORKSPACE}/src/microservices/eShop.PaymentProcessor:/app:z" \
-            -w /app \
-            -e DOTNET_CLI_HOME=/app/.dotnet-temp \
-            mcr.microsoft.com/dotnet/sdk:10.0 \
-            dotnet test eShop.PaymentProcessor.sln
-        """
-    }
-
+    sh """
+    docker run --rm \
+        -v "${WORKSPACE}/src/microservices/eShop.PaymentProcessor:/app:z" \
+        -w /app \
+        -e DOTNET_CLI_HOME=/app/.dotnet-temp \
+        mcr.microsoft.com/dotnet/sdk:10.0 \
+        dotnet test eShop.PaymentProcessor.sln
+    """
 }
 
 
 stage('Build and Push Docker Image') {
-    steps {
-        sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.PaymentProcessor"
-        sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
-    }
+    sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.PaymentProcessor"
+    sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
 }

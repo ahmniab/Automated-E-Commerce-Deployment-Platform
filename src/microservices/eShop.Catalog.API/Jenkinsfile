@@ -8,28 +8,22 @@ env.CONTEXT_PATH = "src/microservices/eShop.Catalog.API"
 
 
 stage('Test Catalog API') {
-    steps {
-        sh "docker build -f ${env.DOCKERFILE_TEST} ${env.CONTEXT_PATH}"
-    }
+    sh "docker build -f ${env.DOCKERFILE_TEST} ${env.CONTEXT_PATH}"
 }
 
 stage('Build Catalog API Image') {
-    steps {
-        sh """
-            docker build \
-            -t ${env.IMAGE_NAME}:${env.VERSION} \
-            -f ${env.DOCKERFILE_APP} \
-            ${env.CONTEXT_PATH}
+    sh """
+        docker build \
+        -t ${env.IMAGE_NAME}:${env.VERSION} \
+        -f ${env.DOCKERFILE_APP} \
+        ${env.CONTEXT_PATH}
         """
-    }
 }
 
 stage('Push Catalog API Image to DockerHub') {
-    steps {
-        sh """
-            docker push ${env.IMAGE_NAME}:${env.VERSION}
-        """
-    }
+    sh """
+        docker push ${env.IMAGE_NAME}:${env.VERSION}
+    """
 }
 
 

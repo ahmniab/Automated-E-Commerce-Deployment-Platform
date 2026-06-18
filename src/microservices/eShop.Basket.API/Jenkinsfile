@@ -5,23 +5,19 @@ env.IMAGE_NAME = "ahmniab/eshop-basket-api"
 
 
 stage('Run Tests for Basket API') {
-    steps {
-        sh """
-        docker run --rm \
-            -v "${WORKSPACE}/src/microservices/eShop.Basket.API:/app:z" \
-            -w /app \
-            -e DOTNET_CLI_HOME=/app/.dotnet-temp \
-            mcr.microsoft.com/dotnet/sdk:10.0 \
-            dotnet test eShop.Basket.API.sln
-        """
-    }
+    sh """
+    docker run --rm \
+        -v "${WORKSPACE}/src/microservices/eShop.Basket.API:/app:z" \
+        -w /app \
+        -e DOTNET_CLI_HOME=/app/.dotnet-temp \
+        mcr.microsoft.com/dotnet/sdk:10.0 \
+        dotnet test eShop.Basket.API.sln
+    """
 
 }
 
 stage('Build and Push Basket API Image') {
-    steps {
-        sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.Basket.API"
-        sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
-    }
+    sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.Basket.API"
+    sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
 }
 
