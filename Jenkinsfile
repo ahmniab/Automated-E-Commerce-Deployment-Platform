@@ -3,10 +3,7 @@ node  {
         checkout scm
     }
     stage('Deploy Changed Services') {
-        echo "current path: ${env.WORKSPACE}"
-        
-        sh 'echo $(ls)' 
-        
+       
         def jops = sh(script: '/usr/bin/python ./src/scripts/get-deployment-jops', returnStdout: true).trim().split('\n')
         
         for (jop in jops) {
