@@ -1,7 +1,8 @@
 node  {
 
     stage('Deploy Changed Services') {
-        def jops = sh(script: '/usr/bin/python ./src/scripts/get-deployment-jop', returnStdout: true).trim().split('\n')
+        def jops = sh(script: '/usr/bin/python ./src/scripts/get-deployment-jops', returnStdout: true).trim().split('\n')
+        echo "current path: ${env.WORKSPACE}"
         for (jop in jops) {
             def jopDetails = jop.split(':')
             def jopPath = jopDetails[0]
