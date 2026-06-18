@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "ahmniab/eshop-catalog-api"
-        IMAGE_TAG = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+        // VERSION = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
 
         DOCKERFILE_TEST = "Dockerfile.test"
         DOCKERFILE_APP = "Dockerfile"
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 sh """
                     docker build \
-                    -t ${IMAGE_NAME}:${IMAGE_TAG} \
+                    -t ${IMAGE_NAME}:${VERSION} \
                     -f ${DOCKERFILE_APP} \
                     ${CONTEXT_PATH}
                 """
@@ -40,7 +40,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
                         echo $PASS | docker login -u $USER --password-stdin
-                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${IMAGE_NAME}:${VERSION}
                     """
                 }
             }

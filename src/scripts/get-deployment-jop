@@ -1,0 +1,20 @@
+#!/usr/bin/python3
+
+import subprocess
+import xml.etree.ElementTree as ET
+
+result = subprocess.run(['git', 'diff', '--name-only', 'HEAD~1', 'HEAD'], capture_output=True, text=True)
+changed_files = result.stdout.strip().split('\n')
+csproj_files = [f for f in changed_files if (f.endswith('.csproj') and f.startswith('src/microservices'))]
+
+jops = []
+
+for f_path in csproj_files:
+    try:
+        version = ET.parse(f_path).find('.//Version').text
+        jop_name = '/'.join(f_path.split('/')[:3]) + "/Jenkinsfile"
+        jops.append((jop_name, version))
+    except Exception as e:
+        pass
+
+print('\n'.join([f"{jop[0]}:{jop[1]}" for jop in jops]))
