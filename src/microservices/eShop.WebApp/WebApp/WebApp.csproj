@@ -8,6 +8,7 @@
 
     <!-- Disable RZ10021, which is failing due to a Razor bug, according to Mackinnon. -->
     <NoWarn>$(NoWarn);RZ10021</NoWarn>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
