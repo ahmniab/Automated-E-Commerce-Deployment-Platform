@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq-common-asbnet-configmap
+  labels:
+    app: rabbitmq-common-asbnet
+data:
+  RabbitMQ__Host: "rabbitmq-service"
+  RabbitMQ__Port: "5672"
+  RabbitMQ__VirtualHost: "/"
