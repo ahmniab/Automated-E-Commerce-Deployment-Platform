@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: basket-api-deployment
+  labels:
+    app: basket-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: basket-api
+  template:
+    metadata:
+      labels:
+        app: basket-api
+    spec:
+      containers:
+        - name: basket-api
+          image: ahmniab/eshop-basket-api:1.0.1
+          ports:
+            - containerPort: 5221
+              name: http-grpc
+          envFrom:
+            - configMapRef:
+                name: rabbitmq-common-asbnet-configmap
+            - configMapRef:
+                name: basket-api-configmap
+          env:
+            # Inject RabbitMQ credentials from existing rabbitmq-secret
+            - name: RabbitMQ__UserName
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_USER
+            - name: RabbitMQ__Password
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: RABBITMQ_DEFAULT_PASS
+
+            # Inject Redis password from existing redis-secret
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD
+
+            # Dynamically construct connection strings using the injected credentials
+            - name: ConnectionStrings__Redis
+              value: "redis-service:6379,password=$(REDIS_PASSWORD),abortConnect=false"
+            - name: ConnectionStrings__EventBus
+              value: "amqp://$(RabbitMQ__UserName):$(RabbitMQ__Password)@rabbitmq-service:5672"
+
+          livenessProbe:
+            tcpSocket:
+              port: 5221
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            tcpSocket:
+              port: 5221
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
