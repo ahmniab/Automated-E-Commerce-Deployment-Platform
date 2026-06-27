@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: identity-api-configmap
+  labels:
+    app: identity-api
+data:
+  MauiCallback: "maui://authcallback"
+  WebAppClient: "http://localhost:8080"
+  BasketApiClient: "http://localhost:5221"
+  OrderingApiClient: "http://ordering-api-service:5224"
+  WebhooksWebClient: "http://localhost:5099"
+  WebhooksApiClient: "http://localhost:5099"
+  ASPNETCORE_ENVIRONMENT: "Production"
