@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: identity-api-deployment
+  labels:
+    app: identity-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: identity-api
+  template:
+    metadata:
+      labels:
+        app: identity-api
+    spec:
+      containers:
+        - name: identity-api
+          image: ahmniab/eshop-identity-api:1.0.1
+          ports:
+            - containerPort: 5223
+              name: http
+          envFrom:
+            - configMapRef:
+                name: identity-api-configmap
+          env:
+            # Inject Postgres credentials from existing postgres-secret
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+
+            # Dynamically construct identity db connection string
+            - name: ConnectionStrings__identitydb
+              value: "Host=postgres-service;Port=5432;Database=identitydb;Username=$(POSTGRES_USER);Password=$(POSTGRES_PASSWORD)"
+
+          volumeMounts:
+            - name: identity-keys
+              mountPath: /app/keys
+
+          livenessProbe:
+            tcpSocket:
+              port: 5223
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            tcpSocket:
+              port: 5223
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: identity-keys
+          persistentVolumeClaim:
+            claimName: identity-keys-pvc

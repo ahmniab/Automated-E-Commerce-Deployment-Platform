@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: basket-api-service
+spec:
+  type: ClusterIP
+  selector:
+    app: basket-api
+  ports:
+    - protocol: TCP
+      port: 5221
+      targetPort: 5221
+      name: http-grpc
