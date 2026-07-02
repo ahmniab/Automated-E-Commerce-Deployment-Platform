@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-processor-deployment
+  labels:
+    app: payment-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-processor
+  template:
+    metadata:
+      labels:
+        app: payment-processor
+    spec:
+      containers:
+      - name: payment-processor
+        image: ahmniab/eshop-payment-processor:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5226
+        envFrom:
+        - configMapRef:
+            name: payment-processor-configmap
+        env:
+        # Pull from the global RabbitMQ secret
+        - name: RABBITMQ_USER
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: RABBITMQ_DEFAULT_USER
+        - name: RABBITMQ_PASS
+          valueFrom:
+            secretKeyRef:
+              name: rabbitmq-secret
+              key: RABBITMQ_DEFAULT_PASS
+              
+        # Map to the .NET configuration variables
+        - name: RabbitMQ__UserName
+          value: "$(RABBITMQ_USER)"
+        - name: RabbitMQ__Password
+          value: "$(RABBITMQ_PASS)"
+          
+        # Dynamically build the connection string
+        - name: ConnectionStrings__EventBus
+          value: "amqp://$(RABBITMQ_USER):$(RABBITMQ_PASS)@rabbitmq:5672"
+          
+        # Enable the health checks
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Development"
+          
+        livenessProbe:
+          httpGet:
+            path: /alive
+            port: 5226
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5226
+          initialDelaySeconds: 15
+          periodSeconds: 10
