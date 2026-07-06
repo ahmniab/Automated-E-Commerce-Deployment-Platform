@@ -26,11 +26,3 @@ stage('Push Catalog API Image to DockerHub') {
     """
 }
 
-
-
-stage('Deploy Catalog API to Kubernetes') {
-    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
-        sh "kubectl set image deployment/catalog-api-deployment catalog-api=${env.IMAGE_NAME}:${env.VERSION} --record"
-        sh "kubectl rollout status deployment/catalog-api-deployment --timeout=120s"
-    }
-}
