@@ -20,11 +20,3 @@ stage('Build and Push Basket API Image') {
     sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.Basket.API"
     sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
 }
-
-
-stage('Deploy Basket API to Kubernetes') {
-    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
-        sh "kubectl set image deployment/basket-api-deployment basket-api=${env.IMAGE_NAME}:${env.VERSION} --record"
-        sh "kubectl rollout status deployment/basket-api-deployment --timeout=120s"
-    }
-}
