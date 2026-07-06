@@ -17,10 +17,3 @@ stage('Build and Push Identity API Image') {
     sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.Identity.API"
     sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
 }
-
-stage('Deploy Identity API to Kubernetes') {
-    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
-        sh "kubectl set image deployment/identity-api-deployment identity-api=${env.IMAGE_NAME}:${env.VERSION} --record"
-        sh "kubectl rollout status deployment/identity-api-deployment --timeout=120s"
-    }
-}

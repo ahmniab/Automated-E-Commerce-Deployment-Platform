@@ -16,10 +16,3 @@ stage('Build and Push Ordering API Image') {
     sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
 }
 
-
-stage('Deploy Ordering API to Kubernetes') {
-    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
-        sh "kubectl set image deployment/ordering-api-deployment ordering-api=${env.IMAGE_NAME}:${env.VERSION} --record"
-        sh "kubectl rollout status deployment/ordering-api-deployment --timeout=120s"
-    }
-}
