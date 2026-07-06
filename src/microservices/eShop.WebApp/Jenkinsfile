@@ -19,3 +19,10 @@ stage('Build and Push Web App Image') {
     sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.WebApp"
     sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
 }
+
+stage('Deploy WebApp to Kubernetes') {
+    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
+        sh "kubectl set image deployment/webapp-deployment webapp=${env.IMAGE_NAME}:${env.VERSION} --record"
+        sh "kubectl rollout status deployment/webapp-deployment --timeout=120s"
+    }
+}

@@ -17,3 +17,10 @@ stage('Build and Push Order Processor Image') {
     sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.OrderProcessor"
     sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
 }
+
+stage('Deploy Order Processor to Kubernetes') {
+    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
+        sh "kubectl set image deployment/order-processor-deployment order-processor=${env.IMAGE_NAME}:${env.VERSION} --record"
+        sh "kubectl rollout status deployment/order-processor-deployment --timeout=120s"
+    }
+}

@@ -18,3 +18,10 @@ stage('Build and Push Docker Image') {
     sh "docker build -t ${env.IMAGE_NAME}:${env.VERSION} src/microservices/eShop.PaymentProcessor"
     sh "docker push ${env.IMAGE_NAME}:${env.VERSION}"
 }
+
+stage('Deploy Payment Processor to Kubernetes') {
+    withKubeConfig([credentialsId: 'kubeconfig-credentials']) {
+        sh "kubectl set image deployment/payment-processor-deployment payment-processor=${env.IMAGE_NAME}:${env.VERSION} --record"
+        sh "kubectl rollout status deployment/payment-processor-deployment --timeout=120s"
+    }
+}
