@@ -23,15 +23,6 @@ pipeline {
             }
         }
 
-        stage('Docker Hub Login') {
-            steps {
-                // Preserve the exact credential ID from the old Jenkinsfile
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                    sh 'echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin'
-                }
-            }
-        }
-
         stage('Test all microservices') {
             parallel {
                 stage('Test Basket API') {
