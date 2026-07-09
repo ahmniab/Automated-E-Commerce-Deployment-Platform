@@ -238,17 +238,16 @@ pipeline {
                           --dry-run=client -o yaml | kubectl apply -f - -n eshop
                     """
 
-                    // Apply Kubernetes manifests to eshop namespace
-                    sh "kubectl apply -f src/k8s/ --recursive -n eshop"
-
-                    // Re-apply secret to make sure postgres-secret.yaml didn't overwrite it with placeholders in eshop namespace
-                    sh """
-                        kubectl create secret generic postgres-secret \
-                          --from-literal=POSTGRES_USER='${dbUser}' \
-                          --from-literal=POSTGRES_PASSWORD='${dbPass}' \
-                          --from-literal=POSTGRES_DB='${dbName}' \
-                          --dry-run=client -o yaml | kubectl apply -f - -n eshop
-                    """
+                    // Apply Kubernetes manifests to eshop namespace (excluding databases)
+                    sh "kubectl apply -f src/k8s/rabbitmq/ -n eshop"
+                    sh "kubectl apply -f src/k8s/redis/redis-secret.yaml -n eshop"
+                    sh "kubectl apply -f src/k8s/basket-api/ -n eshop"
+                    sh "kubectl apply -f src/k8s/catalog-api/ -n eshop"
+                    sh "kubectl apply -f src/k8s/identity-api/ -n eshop"
+                    sh "kubectl apply -f src/k8s/order-processor/ -n eshop"
+                    sh "kubectl apply -f src/k8s/ordering-api/ -n eshop"
+                    sh "kubectl apply -f src/k8s/payment-processor/ -n eshop"
+                    sh "kubectl apply -f src/k8s/webapp/ -n eshop"
 
                     // Set ECR images on all deployments (names and container names from manifests in eshop namespace)
                     sh "kubectl set image deployment/basket-api-deployment basket-api=${env.ECR_REGISTRY}/eshop-basket-api:${env.IMAGE_TAG} -n eshop"
