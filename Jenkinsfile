@@ -230,8 +230,6 @@ pipeline {
                     """
 
                     // Apply Kubernetes manifests to eshop namespace (excluding databases)
-                    sh "kubectl apply -f src/k8s/rabbitmq/ -n eshop"
-                    sh "kubectl apply -f src/k8s/redis/redis-secret.yaml -n eshop"
                     sh "kubectl apply -f src/k8s/basket-api/ -n eshop"
                     sh "kubectl apply -f src/k8s/catalog-api/ -n eshop"
                     sh "kubectl apply -f src/k8s/identity-api/ -n eshop"
