@@ -1,4 +1,4 @@
-﻿namespace eShop.EventBusRabbitMQ;
+namespace eShop.EventBusRabbitMQ;
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -34,6 +34,17 @@ public sealed class RabbitMQEventBus(
         if (logger.IsEnabled(LogLevel.Trace))
         {
             logger.LogTrace("Creating RabbitMQ channel to publish event: {EventId} ({EventName})", @event.Id, routingKey);
+        }
+
+        int retries = 0;
+        while (_rabbitMQConnection == null && retries < 20)
+        {
+            if (logger.IsEnabled(LogLevel.Trace))
+            {
+                logger.LogTrace("Waiting for RabbitMQ connection to be established...");
+            }
+            await Task.Delay(500);
+            retries++;
         }
 
         if (_rabbitMQConnection == null || !_rabbitMQConnection.IsOpen)

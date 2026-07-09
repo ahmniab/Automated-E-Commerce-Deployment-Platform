@@ -49,6 +49,12 @@ public class RabbitMQConnectionFactory
             RequestedHeartbeat = TimeSpan.FromSeconds(30),
         };
 
+        if (_port == 5671)
+        {
+            factory.Ssl.Enabled = true;
+            factory.Ssl.ServerName = _hostName;
+        }
+
         _logger.LogInformation(
             "Creating RabbitMQ connection to {HostName}:{Port}/{VirtualHost}",
             _hostName, _port, _virtualHost ?? "/");
@@ -83,6 +89,12 @@ public class RabbitMQConnectionFactory
             RequestedConnectionTimeout = TimeSpan.FromSeconds(10),
             RequestedHeartbeat = TimeSpan.FromSeconds(30),
         };
+
+        if (_port == 5671)
+        {
+            factory.Ssl.Enabled = true;
+            factory.Ssl.ServerName = _hostName;
+        }
 
         _logger.LogInformation(
             "Creating RabbitMQ connection to {HostName}:{Port}/{VirtualHost}",
