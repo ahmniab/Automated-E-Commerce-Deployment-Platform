@@ -2,11 +2,15 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION       = 'us-east-1'
-        ECR_REGISTRY     = '968138089668.dkr.ecr.us-east-1.amazonaws.com'
-        EKS_CLUSTER_NAME = 'eshop-eks'
-        IMAGE_TAG        = ''
-        ALB_DNS          = 'YOUR_ALB_DNS'
+        AWS_REGION            = 'us-east-1'
+        AWS_DEFAULT_REGION    = 'us-east-1'
+        ECR_REGISTRY          = '968138089668.dkr.ecr.us-east-1.amazonaws.com'
+        EKS_CLUSTER_NAME      = 'eshop-eks'
+        ALB_DNS               = 'YOUR_ALB_DNS'
+        
+        // AWS credentials bound from Jenkins Credentials Store (Secret Text type)
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
     }
 
     stages {
