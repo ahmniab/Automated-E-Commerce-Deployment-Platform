@@ -1,5 +1,3 @@
-def ALB_DNS = 'YOUR_ALB_DNS'
-
 pipeline {
     agent any
 
@@ -8,6 +6,7 @@ pipeline {
         ECR_REGISTRY     = '968138089668.dkr.ecr.us-east-1.amazonaws.com'
         EKS_CLUSTER_NAME = 'eshop-eks'
         IMAGE_TAG        = ''
+        ALB_DNS          = 'YOUR_ALB_DNS'
     }
 
     stages {
@@ -35,7 +34,7 @@ pipeline {
                     steps {
                         sh """
                           docker run --rm \
-                            -v "${WORKSPACE}/src/microservices/eShop.Basket.API:/app:z" \
+                            -v "${env.WORKSPACE}/src/microservices/eShop.Basket.API:/app:z" \
                             -w /app \
                             -e DOTNET_CLI_HOME=/app/.dotnet-temp \
                             mcr.microsoft.com/dotnet/sdk:10.0 \
@@ -47,7 +46,7 @@ pipeline {
                     steps {
                         sh """
                           docker run --rm \
-                            -v "${WORKSPACE}/src/microservices/eShop.Catalog.API:/app:z" \
+                            -v "${env.WORKSPACE}/src/microservices/eShop.Catalog.API:/app:z" \
                             -w /app \
                             -e DOTNET_CLI_HOME=/app/.dotnet-temp \
                             mcr.microsoft.com/dotnet/sdk:10.0 \
@@ -59,7 +58,7 @@ pipeline {
                     steps {
                         sh """
                           docker run --rm \
-                            -v "${WORKSPACE}/src/microservices/eShop.Identity.API:/app:z" \
+                            -v "${env.WORKSPACE}/src/microservices/eShop.Identity.API:/app:z" \
                             -w /app \
                             -e DOTNET_CLI_HOME=/app/.dotnet-temp \
                             mcr.microsoft.com/dotnet/sdk:10.0 \
@@ -71,7 +70,7 @@ pipeline {
                     steps {
                         sh """
                           docker run --rm \
-                            -v "${WORKSPACE}/src/microservices/eShop.OrderProcessor:/app:z" \
+                            -v "${env.WORKSPACE}/src/microservices/eShop.OrderProcessor:/app:z" \
                             -w /app \
                             -e DOTNET_CLI_HOME=/app/.dotnet-temp \
                             mcr.microsoft.com/dotnet/sdk:10.0 \
@@ -83,7 +82,7 @@ pipeline {
                     steps {
                         sh """
                           docker run --rm \
-                            -v "${WORKSPACE}/src/microservices/eShop.Ordering.API:/app:z" \
+                            -v "${env.WORKSPACE}/src/microservices/eShop.Ordering.API:/app:z" \
                             -w /app \
                             -e DOTNET_CLI_HOME=/app/.dotnet-temp \
                             mcr.microsoft.com/dotnet/sdk:10.0 \
@@ -95,7 +94,7 @@ pipeline {
                     steps {
                         sh """
                           docker run --rm \
-                            -v "${WORKSPACE}/src/microservices/eShop.PaymentProcessor:/app:z" \
+                            -v "${env.WORKSPACE}/src/microservices/eShop.PaymentProcessor:/app:z" \
                             -w /app \
                             -e DOTNET_CLI_HOME=/app/.dotnet-temp \
                             mcr.microsoft.com/dotnet/sdk:10.0 \
@@ -107,7 +106,7 @@ pipeline {
                     steps {
                         sh """
                           docker run --rm \
-                            -v "${WORKSPACE}/src/microservices/eShop.WebApp:/app:z" \
+                            -v "${env.WORKSPACE}/src/microservices/eShop.WebApp:/app:z" \
                             -w /app \
                             -e DOTNET_CLI_HOME=/app/.dotnet-temp \
                             mcr.microsoft.com/dotnet/sdk:10.0 \
@@ -122,37 +121,37 @@ pipeline {
             parallel {
                 stage('Build Basket API') {
                     steps {
-                        sh "docker build -t ${ECR_REGISTRY}/eshop-basket-api:${IMAGE_TAG} -f src/microservices/eShop.Basket.API/Dockerfile src/microservices/eShop.Basket.API"
+                        sh "docker build -t ${env.ECR_REGISTRY}/eshop-basket-api:${env.IMAGE_TAG} -f src/microservices/eShop.Basket.API/Dockerfile src/microservices/eShop.Basket.API"
                     }
                 }
                 stage('Build Catalog API') {
                     steps {
-                        sh "docker build -t ${ECR_REGISTRY}/eshop-catalog-api:${IMAGE_TAG} -f src/microservices/eShop.Catalog.API/Dockerfile src/microservices/eShop.Catalog.API"
+                        sh "docker build -t ${env.ECR_REGISTRY}/eshop-catalog-api:${env.IMAGE_TAG} -f src/microservices/eShop.Catalog.API/Dockerfile src/microservices/eShop.Catalog.API"
                     }
                 }
                 stage('Build Identity API') {
                     steps {
-                        sh "docker build -t ${ECR_REGISTRY}/eshop-identity-api:${IMAGE_TAG} -f src/microservices/eShop.Identity.API/Dockerfile src/microservices/eShop.Identity.API"
+                        sh "docker build -t ${env.ECR_REGISTRY}/eshop-identity-api:${env.IMAGE_TAG} -f src/microservices/eShop.Identity.API/Dockerfile src/microservices/eShop.Identity.API"
                     }
                 }
                 stage('Build Order Processor') {
                     steps {
-                        sh "docker build -t ${ECR_REGISTRY}/eshop-order-processor:${IMAGE_TAG} -f src/microservices/eShop.OrderProcessor/Dockerfile src/microservices/eShop.OrderProcessor"
+                        sh "docker build -t ${env.ECR_REGISTRY}/eshop-order-processor:${env.IMAGE_TAG} -f src/microservices/eShop.OrderProcessor/Dockerfile src/microservices/eShop.OrderProcessor"
                     }
                 }
                 stage('Build Ordering API') {
                     steps {
-                        sh "docker build -t ${ECR_REGISTRY}/eshop-ordering-api:${IMAGE_TAG} -f src/microservices/eShop.Ordering.API/Dockerfile src/microservices/eShop.Ordering.API"
+                        sh "docker build -t ${env.ECR_REGISTRY}/eshop-ordering-api:${env.IMAGE_TAG} -f src/microservices/eShop.Ordering.API/Dockerfile src/microservices/eShop.Ordering.API"
                     }
                 }
                 stage('Build Payment Processor') {
                     steps {
-                        sh "docker build -t ${ECR_REGISTRY}/eshop-payment-processor:${IMAGE_TAG} -f src/microservices/eShop.PaymentProcessor/Dockerfile src/microservices/eShop.PaymentProcessor"
+                        sh "docker build -t ${env.ECR_REGISTRY}/eshop-payment-processor:${env.IMAGE_TAG} -f src/microservices/eShop.PaymentProcessor/Dockerfile src/microservices/eShop.PaymentProcessor"
                     }
                 }
                 stage('Build WebApp') {
                     steps {
-                        sh "docker build -t ${ECR_REGISTRY}/eshop-webapp:${IMAGE_TAG} -f src/microservices/eShop.WebApp/Dockerfile src/microservices/eShop.WebApp"
+                        sh "docker build -t ${env.ECR_REGISTRY}/eshop-webapp:${env.IMAGE_TAG} -f src/microservices/eShop.WebApp/Dockerfile src/microservices/eShop.WebApp"
                     }
                 }
             }
@@ -160,7 +159,7 @@ pipeline {
 
         stage('ECR Login') {
             steps {
-                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
+                sh "aws ecr get-login-password --region ${env.AWS_REGION} | docker login --username AWS --password-stdin ${env.ECR_REGISTRY}"
             }
         }
 
@@ -168,37 +167,37 @@ pipeline {
             parallel {
                 stage('Push Basket API') {
                     steps {
-                        sh "docker push ${ECR_REGISTRY}/eshop-basket-api:${IMAGE_TAG}"
+                        sh "docker push ${env.ECR_REGISTRY}/eshop-basket-api:${env.IMAGE_TAG}"
                     }
                 }
                 stage('Push Catalog API') {
                     steps {
-                        sh "docker push ${ECR_REGISTRY}/eshop-catalog-api:${IMAGE_TAG}"
+                        sh "docker push ${env.ECR_REGISTRY}/eshop-catalog-api:${env.IMAGE_TAG}"
                     }
                 }
                 stage('Push Identity API') {
                     steps {
-                        sh "docker push ${ECR_REGISTRY}/eshop-identity-api:${IMAGE_TAG}"
+                        sh "docker push ${env.ECR_REGISTRY}/eshop-identity-api:${env.IMAGE_TAG}"
                     }
                 }
                 stage('Push Order Processor') {
                     steps {
-                        sh "docker push ${ECR_REGISTRY}/eshop-order-processor:${IMAGE_TAG}"
+                        sh "docker push ${env.ECR_REGISTRY}/eshop-order-processor:${env.IMAGE_TAG}"
                     }
                 }
                 stage('Push Ordering API') {
                     steps {
-                        sh "docker push ${ECR_REGISTRY}/eshop-ordering-api:${IMAGE_TAG}"
+                        sh "docker push ${env.ECR_REGISTRY}/eshop-ordering-api:${env.IMAGE_TAG}"
                     }
                 }
                 stage('Push Payment Processor') {
                     steps {
-                        sh "docker push ${ECR_REGISTRY}/eshop-payment-processor:${IMAGE_TAG}"
+                        sh "docker push ${env.ECR_REGISTRY}/eshop-payment-processor:${env.IMAGE_TAG}"
                     }
                 }
                 stage('Push WebApp') {
                     steps {
-                        sh "docker push ${ECR_REGISTRY}/eshop-webapp:${IMAGE_TAG}"
+                        sh "docker push ${env.ECR_REGISTRY}/eshop-webapp:${env.IMAGE_TAG}"
                     }
                 }
             }
@@ -208,11 +207,11 @@ pipeline {
             steps {
                 script {
                     // Update Kubernetes config to point to EKS cluster
-                    sh "aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}"
+                    sh "aws eks update-kubeconfig --region ${env.AWS_REGION} --name ${env.EKS_CLUSTER_NAME}"
 
                     // Fetch postgres DB credentials from AWS Secrets Manager
                     def secretVal = sh(
-                        script: "aws secretsmanager get-secret-value --secret-id eshop/postgres --region ${AWS_REGION} --query SecretString --output text",
+                        script: "aws secretsmanager get-secret-value --secret-id eshop/postgres --region ${env.AWS_REGION} --query SecretString --output text",
                         returnStdout: true
                     ).trim()
 
@@ -248,13 +247,13 @@ pipeline {
                     """
 
                     // Set ECR images on all deployments (names and container names from manifests in eshop namespace)
-                    sh "kubectl set image deployment/basket-api-deployment basket-api=${ECR_REGISTRY}/eshop-basket-api:${IMAGE_TAG} -n eshop"
-                    sh "kubectl set image deployment/catalog-api-deployment catalog-api=${ECR_REGISTRY}/eshop-catalog-api:${IMAGE_TAG} -n eshop"
-                    sh "kubectl set image deployment/identity-api-deployment identity-api=${ECR_REGISTRY}/eshop-identity-api:${IMAGE_TAG} -n eshop"
-                    sh "kubectl set image deployment/order-processor-deployment order-processor=${ECR_REGISTRY}/eshop-order-processor:${IMAGE_TAG} -n eshop"
-                    sh "kubectl set image deployment/ordering-api-deployment ordering-api=${ECR_REGISTRY}/eshop-ordering-api:${IMAGE_TAG} -n eshop"
-                    sh "kubectl set image deployment/payment-processor-deployment payment-processor=${ECR_REGISTRY}/eshop-payment-processor:${IMAGE_TAG} -n eshop"
-                    sh "kubectl set image deployment/webapp-deployment webapp=${ECR_REGISTRY}/eshop-webapp:${IMAGE_TAG} -n eshop"
+                    sh "kubectl set image deployment/basket-api-deployment basket-api=${env.ECR_REGISTRY}/eshop-basket-api:${env.IMAGE_TAG} -n eshop"
+                    sh "kubectl set image deployment/catalog-api-deployment catalog-api=${env.ECR_REGISTRY}/eshop-catalog-api:${env.IMAGE_TAG} -n eshop"
+                    sh "kubectl set image deployment/identity-api-deployment identity-api=${env.ECR_REGISTRY}/eshop-identity-api:${env.IMAGE_TAG} -n eshop"
+                    sh "kubectl set image deployment/order-processor-deployment order-processor=${env.ECR_REGISTRY}/eshop-order-processor:${env.IMAGE_TAG} -n eshop"
+                    sh "kubectl set image deployment/ordering-api-deployment ordering-api=${env.ECR_REGISTRY}/eshop-ordering-api:${env.IMAGE_TAG} -n eshop"
+                    sh "kubectl set image deployment/payment-processor-deployment payment-processor=${env.ECR_REGISTRY}/eshop-payment-processor:${env.IMAGE_TAG} -n eshop"
+                    sh "kubectl set image deployment/webapp-deployment webapp=${env.ECR_REGISTRY}/eshop-webapp:${env.IMAGE_TAG} -n eshop"
 
                     // Wait for rollouts in eshop namespace
                     sh "kubectl rollout status deployment/basket-api-deployment -n eshop --timeout=180s"
@@ -272,7 +271,7 @@ pipeline {
             steps {
                 script {
                     // Check if ALB_DNS is configured. If not, fallback to worker node IP.
-                    if (ALB_DNS == null || ALB_DNS.trim() == "" || ALB_DNS == 'YOUR_ALB_DNS') {
+                    if (env.ALB_DNS == null || env.ALB_DNS.trim() == "" || env.ALB_DNS == 'YOUR_ALB_DNS') {
                         echo "ALB_DNS is not configured. Attempting fallback check using EKS worker node public IP..."
                         try {
                             def nodeIp = sh(
@@ -291,11 +290,11 @@ pipeline {
                             echo "Skipping direct NodePort smoke test: ${e.getMessage()}"
                         }
                     } else {
-                        echo "Smoke testing WebApp root through ALB: http://${ALB_DNS}/"
-                        sh "curl -f http://${ALB_DNS}/ || exit 1"
+                        echo "Smoke testing WebApp root through ALB: http://${env.ALB_DNS}/"
+                        sh "curl -f http://${env.ALB_DNS}/ || exit 1"
 
                         echo "Smoke testing APIs through ALB (if health routes are mapped)..."
-                        sh "curl -f http://${ALB_DNS}/health || echo 'Health endpoint check failed or not mapped'"
+                        sh "curl -f http://${env.ALB_DNS}/health || echo 'Health endpoint check failed or not mapped'"
                     }
                 }
             }
@@ -304,10 +303,10 @@ pipeline {
 
     post {
         failure {
-            echo "Pipeline failed at stage: ${STAGE_NAME}. Check logs above."
+            echo "Pipeline failed. Check logs above."
         }
         success {
-            echo "Deployment successful. Image tag: ${IMAGE_TAG}"
+            echo "Deployment successful. Image tag: ${env.IMAGE_TAG}"
         }
     }
 }
