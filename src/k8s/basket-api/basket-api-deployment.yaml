@@ -11,6 +11,10 @@ spec:
       app: basket-api
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5221"
+        prometheus.io/path: "/metrics"
       labels:
         app: basket-api
     spec:

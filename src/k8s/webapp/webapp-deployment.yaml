@@ -11,6 +11,10 @@ spec:
       app: webapp
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5045"
+        prometheus.io/path: "/metrics"
       labels:
         app: webapp
     spec:
