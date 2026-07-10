@@ -11,12 +11,16 @@ spec:
       app: webapp
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5045"
+        prometheus.io/path: "/metrics"
       labels:
         app: webapp
     spec:
       containers:
         - name: webapp
-          image: ahmniab/eshop-webapp:1.0.3
+          image: ahmniab/eshop-webapp:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5045

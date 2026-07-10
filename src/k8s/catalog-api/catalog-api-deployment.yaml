@@ -11,13 +11,17 @@ spec:
       app: catalog-api
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5222"
+        prometheus.io/path: "/metrics"
       labels:
         app: catalog-api
     spec:
       containers:
         - name: catalog-api
           image: ahmniab/eshop-catalog-api:1.0.0
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Never
           ports:
             - containerPort: 5222
               name: http
