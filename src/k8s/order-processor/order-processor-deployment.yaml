@@ -11,12 +11,16 @@ spec:
       app: order-processor
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "16888"
+        prometheus.io/path: "/metrics"
       labels:
         app: order-processor
     spec:
       containers:
         - name: order-processor
-          image: ahmniab/eshop-order-processor:1.0.2
+          image: ahmniab/eshop-order-processor:1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 16888
